@@ -1,0 +1,4 @@
+#!/bin/sh
+if [ -f vendor/phpunit/phpunit/phpunit ]; then
+	php vendor/phpunit/phpunit/phpunit --verbose --configuration test/phpunit.xml test/unit
+fi
