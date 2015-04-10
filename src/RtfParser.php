@@ -8,6 +8,7 @@
  * PHP version 5
  *
  * @author     Alexander van Oostenrijk
+ * @author     Arnaud PETIT
  * @copyright  2014 Alexander van Oostenrijk
  * @license    GNU GPLv2
  * @version    1
@@ -18,14 +19,43 @@
  * $reader = new RtfReader();
  * $rtf = file_get_contents("itc.rtf"); // or use a string
  * $reader->Parse($rtf);
- * //$reader->root->dump(); // to see what the reader read
+ * //$reader->root->dumpHtml(); // to see what the reader read
  * $formatter = new RtfHtml();
  * echo $formatter->Format($reader->root);
  */
 class RtfParser
 {
+	/**
+	 * 
+	 * @var RtfGroup
+	 */
 	public $root = null;
-
+	/**
+	 *
+	 * @var RtfGroup
+	 */
+	private $group = null;
+	/**
+	 * 
+	 * @var string
+	 */
+	private $rtf = null;
+	/**
+	 * 
+	 * @var int
+	 */
+	private $pos = 0;
+	/**
+	 * 
+	 * @var int
+	 */
+	private $len = 0;
+	/**
+	 * 
+	 * @var string
+	 */
+	private $char = null;
+	
 	protected function GetChar()
 	{
 		$this->char = $this->rtf[$this->pos++];
@@ -43,30 +73,30 @@ class RtfParser
 		}
 		else
 		{
-			array_push($this->group->children, $group);
+			$this->group->children[] = $group;
 			$this->group = $group;
 		}
 	}
-
+	
 	protected function is_letter()
 	{
 		if(ord($this->char) >= 65 && ord($this->char) <= 90) return true;
 		if(ord($this->char) >= 90 && ord($this->char) <= 122) return true;
 		return false;
 	}
-
+	
 	protected function is_digit()
 	{
 		if(ord($this->char) >= 48 && ord($this->char) <= 57) return true;
 		return false;
 	}
-
+	
 	protected function ParseEndGroup()
 	{
 		// Retrieve state of document from stack.
 		$this->group = $this->group->parent;
 	}
-
+	
 	protected function ParseControlWord()
 	{
 		$this->GetChar();
@@ -76,7 +106,7 @@ class RtfParser
 			$word .= $this->char;
 			$this->GetChar();
 		}
-
+		
 		// Read parameter (if any) consisting of digits.
 		// Paramater may be negative.
 		$parameter = null;
@@ -94,7 +124,7 @@ class RtfParser
 		}
 		if($parameter === null) $parameter = 1;
 		if($negative) $parameter = -$parameter;
-
+		
 		// If this is \u, then the parameter will be followed by
 		// a character.
 		if($word == "u")
@@ -108,19 +138,19 @@ class RtfParser
 		{
 			if($this->char != ' ') $this->pos--;
 		}
-
+		
 		$rtfword = new RtfControlWord();
 		$rtfword->word = $word;
 		$rtfword->parameter = $parameter;
 		array_push($this->group->children, $rtfword);
 	}
-
+	
 	protected function ParseControlSymbol()
 	{
 		// Read symbol (one character only).
 		$this->GetChar();
 		$symbol = $this->char;
-
+		
 		// Symbols ordinarily have no parameter. However,
 		// if this is \', then it is followed by a 2-digit hex-code:
 		$parameter = 0;
@@ -131,13 +161,13 @@ class RtfParser
 			$this->GetChar();
 			$parameter = hexdec($parameter . $this->char);
 		}
-
+		
 		$rtfsymbol = new RtfControlSymbol();
 		$rtfsymbol->symbol = $symbol;
 		$rtfsymbol->parameter = $parameter;
-		array_push($this->group->children, $rtfsymbol);
+		$this->group->children[] = $rtfsymbol;
 	}
-
+	
 	protected function ParseControl()
 	{
 		// Beginning of an RTF control word or control symbol.
@@ -150,18 +180,18 @@ class RtfParser
 		else
 			$this->ParseControlSymbol();
 	}
-
+	
 	protected function ParseText()
 	{
 		// Parse plain text up to backslash or brace,
 		// unless escaped.
 		$text = "";
-
+		
 		do
 		{
 			$terminate = false;
 			$escape = false;
-
+			
 			// Is this an escape?
 			if($this->char == '\\')
 			{
@@ -185,7 +215,7 @@ class RtfParser
 				$this->pos--;
 				$terminate = true;
 			}
-
+			
 			if(!$terminate && !$escape)
 			{
 				$text .= $this->char;
@@ -193,12 +223,12 @@ class RtfParser
 			}
 		}
 		while(!$terminate && $this->pos < $this->len);
-
+		
 		$rtftext = new RtfText();
 		$rtftext->text = $text;
-		array_push($this->group->children, $rtftext);
+		$this->group->children[] = $rtftext;
 	}
-
+	
 	public function Parse($rtf)
 	{
 		$this->rtf = $rtf;
@@ -206,15 +236,15 @@ class RtfParser
 		$this->len = strlen($this->rtf);
 		$this->group = null;
 		$this->root = null;
-
+		
 		while($this->pos < $this->len)
 		{
 			// Read next character:
 			$this->GetChar();
-
+			
 			// Ignore \r and \n
 			if($this->char == "\n" || $this->char == "\r") continue;
-
+			
 			// What type of character is this?
 			switch($this->char)
 			{
@@ -233,4 +263,5 @@ class RtfParser
 			}
 		}
 	}
+	
 }

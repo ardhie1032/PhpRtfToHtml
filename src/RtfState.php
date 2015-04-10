@@ -8,6 +8,7 @@
  * PHP version 5
  *
  * @author     Alexander van Oostenrijk
+ * @author     Arnaud PETIT
  * @copyright  2014 Alexander van Oostenrijk
  * @license    GNU GPLv2
  * @version    1
@@ -15,11 +16,12 @@
  */
 class RtfState
 {
+	
 	public function __construct()
 	{
 		$this->Reset();
 	}
-
+	
 	public function Reset()
 	{
 		$this->bold = false;
@@ -30,4 +32,5 @@ class RtfState
 		$this->hidden = false;
 		$this->fontsize = 0;
 	}
+	
 }

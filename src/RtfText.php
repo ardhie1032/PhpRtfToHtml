@@ -8,6 +8,7 @@
  * PHP version 5
  *
  * @author     Alexander van Oostenrijk
+ * @author     Arnaud PETIT
  * @copyright  2014 Alexander van Oostenrijk
  * @license    GNU GPLv2
  * @version    1
@@ -15,13 +16,31 @@
  */
 class RtfText extends RtfElement
 {
+	/**
+	 * 
+	 * @var string
+	 */
 	public $text;
-
-	public function dump($level)
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::dumpHtml()
+	 */
+	public function dumpHtml($level)
 	{
 		echo "<div style='color:red'>";
-		$this->Indent($level);
+		echo $this->indentHtml($level);
 		echo "TEXT {$this->text}";
 		echo "</div>";
 	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::equals()
+	 */
+	public function equals($object)
+	{
+		return parent::equals($object) && $this->text === $object->text;
+	}
+	
 }

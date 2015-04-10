@@ -8,6 +8,7 @@
  * PHP version 5
  *
  * @author     Alexander van Oostenrijk
+ * @author     Arnaud PETIT
  * @copyright  2014 Alexander van Oostenrijk
  * @license    GNU GPLv2
  * @version    1
@@ -15,14 +16,38 @@
  */
 class RtfControlSymbol extends RtfElement
 {
-	public $symbol;
+	/**
+	 * 
+	 * @var string
+	 */
+	public $symbol = "";
+	/**
+	 * 
+	 * @var int
+	 */
 	public $parameter = 0;
-
-	public function dump($level)
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::dumpHtml()
+	 */
+	public function dumpHtml($level)
 	{
 		echo "<div style='color:blue'>";
-		$this->Indent($level);
+		echo $this->indentHtml($level);
 		echo "SYMBOL {$this->symbol} ({$this->parameter})";
 		echo "</div>";
 	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::equals()
+	 */
+	public function equals($object)
+	{
+		return parent::equals($object) 
+				&& $this->symbol === $object->symbol
+				&& $this->parameter === $object->parameter;
+	}
+	
 }

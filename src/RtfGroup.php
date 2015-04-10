@@ -8,6 +8,7 @@
  * PHP version 5
  *
  * @author     Alexander van Oostenrijk
+ * @author     Arnaud PETIT
  * @copyright  2014 Alexander van Oostenrijk
  * @license    GNU GPLv2
  * @version    1
@@ -15,15 +16,17 @@
  */
 class RtfGroup extends RtfElement
 {
-	public $parent;
-	public $children;
-
-	public function __construct()
-	{
-		$this->parent = null;
-		$this->children = array();
-	}
-
+	/**
+	 * 
+	 * @var RtfGroup
+	 */
+	public $parent = null;
+	/**
+	 * 
+	 * @var RtfElement[]
+	 */
+	public $children = array();
+	
 	public function GetType()
 	{
 		// No children?
@@ -33,7 +36,7 @@ class RtfGroup extends RtfElement
 		if(get_class($child) != "RtfControlWord") return null;
 		return $child->word;
 	}
-
+	
 	public function IsDestination()
 	{
 		// No children?
@@ -43,14 +46,18 @@ class RtfGroup extends RtfElement
 		if(get_class($child) != "RtfControlSymbol") return null;
 		return $child->symbol == '*';
 	}
-
-	public function dump($level = 0)
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::dumpHtml()
+	 */
+	public function dumpHtml($level = 0)
 	{
 		echo "<div>";
-		$this->Indent($level);
+		echo $this->indentHtml($level);
 		echo "{";
 		echo "</div>";
-
+		
 		foreach($this->children as $child)
 		{
 			if(get_class($child) == "RtfGroup")
@@ -63,12 +70,33 @@ class RtfGroup extends RtfElement
 				if (substr($child->GetType(), 0, 4) == "pict") continue;
 				if ($child->IsDestination()) continue;
 			}
-			$child->dump($level + 2);
+			$child->dumpHtml($level + 2);
 		}
-
+		
 		echo "<div>";
-		$this->Indent($level);
+		echo $this->indentHtml($level);
 		echo "}";
 		echo "</div>";
 	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::equals()
+	 */
+	public function equals($object)
+	{
+		if(!parent::equals($object))
+			return false;
+		
+		if(count($this->children) !== count($object->children))
+			return false;
+		
+		foreach($this->children as $i => $child)
+		{
+			if(!$child->equals($object->children[$i]))
+				return false;
+		}
+		return true;
+	}
+	
 }

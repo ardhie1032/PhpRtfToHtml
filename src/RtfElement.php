@@ -8,7 +8,7 @@
  * PHP version 5
  *
  * @author     Alexander van Oostenrijk
- * @author     Arnaud Petit
+ * @author     Arnaud PETIT
  * @copyright  2014 Alexander van Oostenrijk
  * @license    GNU GPLv2
  * @version    1
@@ -24,7 +24,7 @@ abstract class RtfElement
 	 */
 	protected function indentHtml($level)
 	{
-		return str_repeat("&nbps;", 4*$level);
+		return str_repeat("&nbsp;", 4*$level);
 	}
 	
 	/**
@@ -42,7 +42,7 @@ abstract class RtfElement
 	 * @param int $level
 	 * @return string
 	 */
-	public function dumpHtml($level)
+	public function dumpHtml($level=0)
 	{
 		return '<div>'.$this->indentHtml($level).$this->dump($level).'</div>';
 	}
@@ -52,7 +52,7 @@ abstract class RtfElement
 	 * @param int $level
 	 * @return string
 	 */
-	public function dump($level)
+	public function dump($level=0)
 	{
 		return $this->indent($level).'ELEMENT UNKNOWN';
 	}
