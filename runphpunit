@@ -1,4 +1,18 @@
 #!/bin/sh
+
+# First, update composer to have the right classloader
+if [ -f composer.json ]; then
+	if [ -f composer.phar ]; then
+		echo "Composer update..."
+#		php composer.phar self-update
+		php composer.phar update
+		echo "Composer update done."
+	fi
+fi
+
+# Second, run phpunit
 if [ -f vendor/phpunit/phpunit/phpunit ]; then
+	echo "Running Phpunit test suite..."
 	php vendor/phpunit/phpunit/phpunit --verbose --configuration test/phpunit.xml test/unit
+	echo "Phpunit test suite run done."
 fi

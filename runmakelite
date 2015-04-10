@@ -1,0 +1,4 @@
+#!/bin/sh
+if [ -f lite/make.php ]; then
+	php lite/make.php
+fi
