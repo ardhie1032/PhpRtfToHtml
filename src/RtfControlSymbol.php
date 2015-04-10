@@ -1,7 +1,7 @@
 <?php
 
 /**
- * RTF parser/formatter
+ * RTF Control Symbol
  *
  * This code reads RTF files and formats the RTF data to HTML.
  *
