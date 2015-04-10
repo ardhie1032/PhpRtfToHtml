@@ -12,7 +12,8 @@
  * @copyright  2014 Alexander van Oostenrijk
  * @license    GNU GPLv2
  * @version    1
- * @link       http://www.websofia.com
+ * @link       http://www.websofia.com/2014/05/a-working-rtf-to-html-converter-in-php/
+ * @link       https://github.com/Anastaszor/PhpRtfToHtml
  */
 abstract class RtfElement
 {
@@ -75,6 +76,52 @@ abstract class RtfElement
 	public function equals($object)
 	{
 		return is_object($object) && get_class($object) === get_class($this);
+	}
+	
+	/**
+	 * Gets a basic string representation of this object.
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return '';
+	}
+	
+	/**
+	 * Gets the rtf representation of this object.
+	 * @return string
+	 */
+	public function __toRtf()
+	{
+		return '';
+	}
+	
+	/**
+	 * Gets the html representation of this object.
+	 * @return string
+	 */
+	public function __toHtml()
+	{
+		return '';
+	}
+	
+	/**
+	 * Destructs this object and all of its related to avoid php 5 circular
+	 * reference memory leak.
+	 */
+	public function free()
+	{
+		$this->__destruct();
+	}
+	
+	/**
+	 * Destructs this object. Should free this object only. Should not have
+	 * errors nor throw exceptions, or all of this will result into a php
+	 * non catchable fatal error.
+	 */
+	public function __destruct()
+	{
+		// do nothing
 	}
 	
 }

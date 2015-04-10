@@ -10,3 +10,8 @@ vendor/
 .settings
 .project
 .buildpath
+
+#other projects crap
+test/*.rtf
+test/*.html
+

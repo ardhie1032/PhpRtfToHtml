@@ -13,6 +13,7 @@
  * @license    GNU GPLv2
  * @version    1
  * @link       http://www.websofia.com/2014/05/a-working-rtf-to-html-converter-in-php/
+ * @link       https://github.com/Anastaszor/PhpRtfToHtml
  *
  * Sample of use:
  *
@@ -55,6 +56,7 @@ class RtfParser
 	 * @var string
 	 */
 	private $char = null;
+	
 	
 	protected function GetChar()
 	{
@@ -151,21 +153,24 @@ class RtfParser
 		$this->GetChar();
 		$symbol = $this->char;
 		
-		// Symbols ordinarily have no parameter. However,
-		// if this is \', then it is followed by a 2-digit hex-code:
-		$parameter = 0;
 		if($symbol == '\'')
 		{
+			// Symbols ordinarily have no parameter. However,
+			// if this is \', then it is followed by a 2-digit hex-code:
 			$this->GetChar();
 			$parameter = $this->char;
 			$this->GetChar();
-			$parameter = hexdec($parameter . $this->char);
+			$parameter = $parameter . $this->char;
+			$rtfsymbol = new RtfHexaControlSymbol();
+			$rtfsymbol->setParameterFromHexa($parameter);
+			$this->group->children[] = $rtfsymbol;
 		}
-		
-		$rtfsymbol = new RtfControlSymbol();
-		$rtfsymbol->symbol = $symbol;
-		$rtfsymbol->parameter = $parameter;
-		$this->group->children[] = $rtfsymbol;
+		else
+		{
+			$rtfsymbol = new RtfControlSymbol();
+			$rtfsymbol->symbol = $symbol;
+			$this->group->children[] = $rtfsymbol;
+		}
 	}
 	
 	protected function ParseControl()

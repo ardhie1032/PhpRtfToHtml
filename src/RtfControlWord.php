@@ -12,7 +12,8 @@
  * @copyright  2014 Alexander van Oostenrijk
  * @license    GNU GPLv2
  * @version    1
- * @link       http://www.websofia.com
+ * @link       http://www.websofia.com/2014/05/a-working-rtf-to-html-converter-in-php/
+ * @link       https://github.com/Anastaszor/PhpRtfToHtml
  */
 class RtfControlWord extends RtfElement
 {
