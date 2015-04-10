@@ -22,7 +22,7 @@
  * $formatter = new RtfHtml();
  * echo $formatter->Format($reader->root);
  */
-class RtfReader
+class RtfParser
 {
 	public $root = null;
 
