@@ -45,7 +45,7 @@ abstract class RtfElement
 	 */
 	public function dumpHtml($level=0)
 	{
-		return '<div>'.$this->indentHtml($level).$this->dump($level).'</div>';
+		return "<div>".$this->indentHtml($level).$this->dump($level)."</div>\n";
 	}
 	
 	/**
@@ -55,7 +55,7 @@ abstract class RtfElement
 	 */
 	public function dump($level=0)
 	{
-		return $this->indent($level).'ELEMENT UNKNOWN';
+		return $this->indent($level)."ELEMENT UNKNOWN\n";
 	}
 	
 	/**

@@ -57,7 +57,7 @@ class RtfGroup extends RtfElement
 		echo "<div>";
 		echo $this->indentHtml($level);
 		echo "{";
-		echo "</div>";
+		echo "</div>\n";
 		
 		foreach($this->children as $child)
 		{
@@ -77,7 +77,7 @@ class RtfGroup extends RtfElement
 		echo "<div>";
 		echo $this->indentHtml($level);
 		echo "}";
-		echo "</div>";
+		echo "</div>\n";
 	}
 	
 	/**

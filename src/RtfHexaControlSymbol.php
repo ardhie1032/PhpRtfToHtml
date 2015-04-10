@@ -24,12 +24,19 @@ class RtfHexaControlSymbol extends RtfControlSymbol
 	 * @var int
 	 */
 	private $_value = 0;
-	
+	/**
+	 * Gets the decimal value of this object.
+	 * @return int
+	 */
+	public function getValue()
+	{
+		return $this->_value;
+	}
 	/**
 	 * Sets the value of this object from an hexadecimal value.
 	 * @param string $value
 	 */
-	public function setParameterFromHexa($value)
+	public function setValueFromHex($value)
 	{
 		$this->_value = hexdec($value);
 	}
@@ -37,7 +44,7 @@ class RtfHexaControlSymbol extends RtfControlSymbol
 	 * Sets the value of this object from a decimal value.
 	 * @param string $value
 	 */
-	public function setParameterFromDec($value)
+	public function setValueFromDec($value)
 	{
 		$this->_value = $value;
 	}
@@ -48,7 +55,7 @@ class RtfHexaControlSymbol extends RtfControlSymbol
 	 */
 	public function equals($object)
 	{
-		return parent::equals($object) && $this->parameter === $object->parameter;
+		return parent::equals($object) && $this->_value === $object->_value;
 	}
 	
 	/**
@@ -65,7 +72,7 @@ class RtfHexaControlSymbol extends RtfControlSymbol
 	 */
 	public function __toRtf()
 	{
-		return '\\'."'".$this->_value;
+		return '\\'."'".dechex($this->_value);
 	}
 	/**
 	 * (non-PHPdoc)
@@ -73,7 +80,7 @@ class RtfHexaControlSymbol extends RtfControlSymbol
 	 */
 	public function __toHtml()
 	{
-		return '&x'.$this->_value.';';
+		return '&#'.$this->_value.';';
 	}
 	/**
 	 * (non-PHPdoc)
