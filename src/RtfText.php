@@ -26,12 +26,23 @@ class RtfText extends RtfElement
 	 * (non-PHPdoc)
 	 * @see RtfElement::dumpHtml()
 	 */
-	public function dumpHtml($level)
+	public function dumpHtml($level=0)
 	{
 		echo "<div style='color:red'>";
 		echo $this->indentHtml($level);
 		echo "TEXT {$this->text}";
 		echo "</div>";
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::extractTextTree()
+	 */
+	public function extractTextTree()
+	{
+		if(trim($this->text)==="")
+			return null;
+		return $this;
 	}
 	
 	/**

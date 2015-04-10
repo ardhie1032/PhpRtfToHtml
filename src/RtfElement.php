@@ -58,14 +58,23 @@ abstract class RtfElement
 	}
 	
 	/**
+	 * Gets the tree represented by this element with all the nodes that
+	 * are only tree nodes.
+	 * @return RtfElement
+	 */
+	public function extractTextTree()
+	{
+		return null;
+	}
+	
+	/**
 	 * Compares two objects from this library. This function must be inherited.
 	 * @param object $object
 	 * @return boolean true if both objects are equal.
 	 */
 	public function equals($object)
 	{
-		return is_object($object) && ($object instanceof RtfElement 
-					|| is_subclass_of($object, get_class($this)));
+		return is_object($object) && get_class($object) === get_class($this);
 	}
 	
 }

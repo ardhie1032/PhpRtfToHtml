@@ -142,7 +142,7 @@ class RtfParser
 		$rtfword = new RtfControlWord();
 		$rtfword->word = $word;
 		$rtfword->parameter = $parameter;
-		array_push($this->group->children, $rtfword);
+		$this->group->children[] = $rtfword;
 	}
 	
 	protected function ParseControlSymbol()

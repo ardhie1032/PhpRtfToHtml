@@ -31,12 +31,21 @@ class RtfControlSymbol extends RtfElement
 	 * (non-PHPdoc)
 	 * @see RtfElement::dumpHtml()
 	 */
-	public function dumpHtml($level)
+	public function dumpHtml($level=0)
 	{
 		echo "<div style='color:blue'>";
 		echo $this->indentHtml($level);
-		echo "SYMBOL {$this->symbol} ({$this->parameter})";
+		echo "SYMBOL {$this->symbol} (&#{$this->parameter};)";
 		echo "</div>";
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::extractTextTree()
+	 */
+	public function extractTextTree()
+	{
+		return $this;
 	}
 	
 	/**

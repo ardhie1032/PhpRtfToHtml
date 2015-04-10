@@ -81,6 +81,35 @@ class RtfGroup extends RtfElement
 	
 	/**
 	 * (non-PHPdoc)
+	 * @see RtfElement::extractTextTree()
+	 */
+	public function extractTextTree()
+	{
+		$root = new self();
+		$root->parent = $this->parent; 
+		foreach($this->children as $child)
+		{
+			if(get_class($child) == "RtfGroup")
+			{
+				if ($child->GetType() == "fonttbl") continue;
+				if ($child->GetType() == "colortbl") continue;
+				if ($child->GetType() == "stylesheet") continue;
+				if ($child->GetType() == "info") continue;
+				// Skip any pictures:
+				if (substr($child->GetType(), 0, 4) == "pict") continue;
+				if ($child->IsDestination()) continue;
+			}
+			$subtree = $child->extractTextTree();
+			if($subtree !== null)
+			{
+				$root->children[] = $subtree;
+			}
+		}
+		return (count($root->children)===0) ? null : $root;
+	}
+	
+	/**
+	 * (non-PHPdoc)
 	 * @see RtfElement::equals()
 	 */
 	public function equals($object)
