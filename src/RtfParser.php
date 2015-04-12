@@ -62,7 +62,7 @@ class Rtfparser
 	{
 		$this->char = $this->rtf[$this->pos++];
 	}
-
+	
 	protected function parseStartGroup()
 	{
 		// Store state of document on stack.

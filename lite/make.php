@@ -12,27 +12,26 @@ class MyRecursiveFilterIterator extends RecursiveFilterIterator
 		'__MACOSX',
 	);
 	public function accept() {
-		return !in_array($this->current()->getFilename(),self::$FILTERS,true);
+		return !in_array($this->current()->getFilename(),self::$FILTERS,true)
+			&& preg_match('#\.php$#', $this->current()->getFilename());
 	}
 }
 
-
-
 $files = array();
-
 $iterator = new RecursiveDirectoryIterator($source);
 $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
-$filter = new MyRecursiveFilterIterator($iterator);
-$all_files = new RecursiveIteratorIterator($filter,RecursiveIteratorIterator::SELF_FIRST);
+$f = new MyRecursiveFilterIterator($iterator);
+$all = new RecursiveIteratorIterator($f,RecursiveIteratorIterator::SELF_FIRST);
 
-foreach($all_files as $file)
+// get all php files from src folder
+foreach($all as $file)
 {
 	$last = strrpos($file, DIRECTORY_SEPARATOR);
 	$classname = substr(str_replace('.php', '', $file), $last+1);
 	// get rid of the first <?php
 	$content = substr(file_get_contents($file), 5);
 	// get rid of all one-liner comments
-	$content = preg_replace('#//.*'.PHP_EOL.'#', '', $content);
+	$content = preg_replace('#//.*?'.PHP_EOL.'#', '', $content);
 	// get rid of all others line breaks, tabs, and so on
 	$content = str_replace(array("\r", "\n", "\t"), '', $content);
 	// get rid of all multiline comments (that are now one liner)
@@ -61,16 +60,16 @@ foreach($all_files as $file)
 		$content = preg_replace('#\s*'.$regex.'\s*#', $replacement, $content);
 	}
 	
-	
 	// stores the living content to current array
 	$files[$classname] = $content;
 }
 
+// build an array where all classes have an array of needed classes
 $dependancies = array();
 foreach($files as $classname => $file)
 {
 	$superclassregex = 'extends\s*([\w\d_]+)';
-	$interfacesregex = 'implements\s*(([\w\d_]+)(\s*,\s*[\w\d_]+)*';
+	$interfacesregex = 'implements\s*((([\w\d_]+)(\s*,\s*[\w\d_]+)*)';
 	$superclass = array();
 	if(strpos($file, 'extends')!==false)
 	{
@@ -82,10 +81,14 @@ foreach($files as $classname => $file)
 	if(strpos($file, 'implements')!==false)
 	{
 		preg_match('#'.$interfacesregex.'#', $file, $interfaces);
+		if(isset($interfaces[1]))
+			$interfaces = array_map('trim', explode(',', $interfaces[1]));
 	}
 	$dependancies[$classname] = $superclass + $interfaces;
-	
 }
+
+// builds a list where classes are appened in it where all their needed
+// classes are already into the list
 $dlist = array();
 foreach($dependancies as $dpdname => $dpdval)
 {
@@ -95,6 +98,7 @@ foreach($dependancies as $dpdname => $dpdval)
 		unset($dependancies[$dpdname]);
 	}
 }
+$loops=0;
 while($dependancies!==array())
 {
 	foreach($dependancies as $dpdname => $dpdvalues)
@@ -110,12 +114,22 @@ while($dependancies!==array())
 			unset($dependancies[$dpdname]);
 		}
 	}
+	// eternal recursion flashlight
+	$loops++;
+	// some class couldnt fulfill all of its requirements, some directory
+	// that should have been included was not.
+	if($loops>100)
+		throw new Exception(
+			'Impossible to set up hierarchy among classes, 100+ loops needed.'
+		);
 }
 
+// builds the bigfile by including all the reduced files one by one in order
 $full_content = "<?php ";
 foreach($dlist as $classname)
 {
 	$full_content .= $files[$classname];
 }
 
+// finally, write the resulting file to destination.
 file_put_contents($destination, $full_content);
