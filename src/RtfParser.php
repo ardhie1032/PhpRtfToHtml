@@ -62,6 +62,27 @@ class Rtfparser
 	 * @var string => int
 	 */
 	private $_stats = array();
+	/**
+	 * All the classes where to map parsing groups.
+	 * @var string[]
+	 */
+	private $_routes = array(
+		'bkmkend' => 'RtfBookmarkEndGroup',
+		'bkmkstart' => 'RtfBookmarkStartGroup',
+		'colorschememapping' => 'RtfColorSchemeMappingGroup',
+		'colortbl' => 'RtfColorTableGroup',
+		'datastore' => 'RtfDataStoreGroup',
+		'fonttbl' => 'RtfFontTableGroup',
+		'info' => 'RtfInfoGroup',
+		'latentstyles' => 'RtfLatentStylesGroup',
+		'listtable' => 'RtfListTableGroup',
+		'pict' => 'RtfPictureGroup',
+		'pnseclvl' => 'RtfPnSecLevelGroup',
+		'stylesheet' => 'RtfStylesheetGroup',
+		'themedata' => 'RtfThemeDataGroup',
+		'xmlnstbl' => 'RtfXmlNsTableGroup',
+		'xmlopen' => 'RtfXmlOpenGroup',
+	);
 	
 	/**
 	 * Gets the instanciation stats about this parser.
@@ -70,6 +91,13 @@ class Rtfparser
 	public function getStats()
 	{
 		return $this->_stats;
+	}
+	
+	protected function lookupGroupClass($word)
+	{
+		if(array_key_exists($word, $this->_routes))
+			return $this->_routes[$word];
+		return 'RtfGenericGroup';
 	}
 	
 	protected function incrementStats($classname)
@@ -92,10 +120,10 @@ class Rtfparser
 		{
 			$special = false;
 			$this->getChar();
-			// if this is a star, then the group should begin 2 characters
-			// later. A star indicates a non-recognizable special group.
 			if($this->char==='*')
 			{
+				// if this is a star, then the group should begin 2 characters
+				// later. A star indicates a non-recognizable special group.
 				$this->getChar();
 				$this->getChar();
 				$special = true;
@@ -172,25 +200,6 @@ class Rtfparser
 		{
 			$this->group->children[] = $group;
 			$this->group = $group;
-		}
-	}
-	
-	protected function lookupGroupClass($word)
-	{
-		switch(true)
-		{
-			case 'fonttbl'===$word:
-				return 'RtfFontTableGroup';
-			case 'colortbl'===$word:
-				return 'RtfColorTableGroup';
-			case 'stylesheet'===$word:
-				return 'RtfStylesheetGroup';
-			case 'info'===$word:
-				return 'RtfInfoGroup';
-			case 'pict'===$word:
-				return 'RtfPictureGroup';
-			default:
-				return 'RtfGenericGroup';
 		}
 	}
 	
@@ -352,7 +361,8 @@ class Rtfparser
 	
 	public function parse($rtf)
 	{
-		$this->rtf = $rtf;
+		// Ignore \r and \n
+		$this->rtf = str_replace(array("\n", "\r"), '', $rtf);
 		$this->pos = 0;
 		$this->len = strlen($this->rtf);
 		$this->group = null;
@@ -362,9 +372,6 @@ class Rtfparser
 		{
 			// Read next character:
 			$this->getChar();
-			
-			// Ignore \r and \n
-			if($this->char == "\n" || $this->char == "\r") continue;
 			
 			// What type of character is this?
 			switch($this->char)
