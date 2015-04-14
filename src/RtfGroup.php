@@ -1,9 +1,9 @@
 <?php
 
 /**
- * RTF parser/formatter
+ * RtfGroup class file.
  *
- * This code reads RTF files and formats the RTF data to HTML.
+ * This class represents a group, in rtf syntax.
  *
  * PHP version 5
  *
@@ -15,18 +15,20 @@
  * @link       http://www.websofia.com/2014/05/a-working-rtf-to-html-converter-in-php/
  * @link       https://github.com/Anastaszor/PhpRtfToHtml
  */
-class RtfGroup extends RtfElement
+abstract class RtfGroup extends RtfElement
 {
 	/**
-	 * 
+	 * The parent of this group.
 	 * @var RtfGroup
 	 */
 	public $parent = null;
 	/**
-	 * 
+	 * All the children of this group, in order.
 	 * @var RtfElement[]
 	 */
 	public $children = array();
+	
+	public abstract function getWord();
 	
 	public function GetType()
 	{
@@ -34,7 +36,7 @@ class RtfGroup extends RtfElement
 		if(sizeof($this->children) == 0) return null;
 		// First child not a control word?
 		$child = $this->children[0];
-		if(get_class($child) != "RtfControlWord") return null;
+		if(!($child instanceof RtfControlWord)) return null;
 		return $child->word;
 	}
 	
@@ -44,69 +46,8 @@ class RtfGroup extends RtfElement
 		if(sizeof($this->children) == 0) return null;
 		// First child not a control symbol?
 		$child = $this->children[0];
-		if(get_class($child) != "RtfControlSymbol") return null;
-		return $child->symbol == '*';
-	}
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see RtfElement::dumpHtml()
-	 */
-	public function dumpHtml($level = 0)
-	{
-		echo "<div>";
-		echo $this->indentHtml($level);
-		echo "{";
-		echo "</div>\n";
-		
-		foreach($this->children as $child)
-		{
-			if(get_class($child) == "RtfGroup")
-			{
-				if ($child->GetType() == "fonttbl") continue;
-				if ($child->GetType() == "colortbl") continue;
-				if ($child->GetType() == "stylesheet") continue;
-				if ($child->GetType() == "info") continue;
-				// Skip any pictures:
-				if (substr($child->GetType(), 0, 4) == "pict") continue;
-				if ($child->IsDestination()) continue;
-			}
-			$child->dumpHtml($level + 2);
-		}
-		
-		echo "<div>";
-		echo $this->indentHtml($level);
-		echo "}";
-		echo "</div>\n";
-	}
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see RtfElement::extractTextTree()
-	 */
-	public function extractTextTree()
-	{
-		$root = new self();
-		$root->parent = $this->parent; 
-		foreach($this->children as $child)
-		{
-			if(get_class($child) == "RtfGroup")
-			{
-				if ($child->GetType() == "fonttbl") continue;
-				if ($child->GetType() == "colortbl") continue;
-				if ($child->GetType() == "stylesheet") continue;
-				if ($child->GetType() == "info") continue;
-				// Skip any pictures:
-				if (substr($child->GetType(), 0, 4) == "pict") continue;
-				if ($child->IsDestination()) continue;
-			}
-			$subtree = $child->extractTextTree();
-			if($subtree !== null)
-			{
-				$root->children[] = $subtree;
-			}
-		}
-		return (count($root->children)===0) ? null : $root;
+		if(!($child instanceof RtfControlSymbol)) return null;
+		return $child->getSymbol() == '*';
 	}
 	
 	/**

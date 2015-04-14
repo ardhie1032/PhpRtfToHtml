@@ -57,6 +57,28 @@ class Rtfparser
 	 */
 	private $char = null;
 	
+	/**
+	 * Gets the instanciation stats about this rtf.
+	 * @var string => int
+	 */
+	private $_stats = array();
+	
+	/**
+	 * Gets the instanciation stats about this parser.
+	 * @return int[]
+	 */
+	public function getStats()
+	{
+		return $this->_stats;
+	}
+	
+	protected function incrementStats($classname)
+	{
+		if(isset($this->_stats[$classname]))
+			$this->_stats[$classname] = $this->_stats[$classname] + 1;
+		else
+			$this->_stats[$classname] = 1;
+	}
 	
 	protected function getChar()
 	{
@@ -65,9 +87,82 @@ class Rtfparser
 	
 	protected function parseStartGroup()
 	{
+		$this->getChar();
+		if($this->char=='\\')
+		{
+			$special = false;
+			$this->getChar();
+			// if this is a star, then the group should begin 2 characters
+			// later. A star indicates a non-recognizable special group.
+			if($this->char==='*')
+			{
+				$this->getChar();
+				$this->getChar();
+				$special = true;
+			}
+			$word = "";
+			while($this->isLetter())
+			{
+				$word .= $this->char;
+				$this->getChar();
+			}
+			
+			// Read parameter (if any) consisting of digits.
+			// Paramater may be negative.
+			$parameter = null;
+			$negative = false;
+			if($this->char == '-')
+			{
+				$this->getChar();
+				$negative = true;
+			}
+			while($this->isDigit())
+			{
+				if($parameter == null) $parameter = 0;
+				$parameter = $parameter * 10 + $this->char;
+				$this->getChar();
+			}
+			if($parameter === null) $parameter = 1;
+			if($negative) $parameter = -$parameter;
+			
+			
+			if($word == "u")
+			{
+				// If this is \u, then the parameter will be followed by
+				// a character.
+			}
+			else
+			{
+				// If the current character is a space, then
+				// it is a delimiter. It is consumed.
+				// If it's not a space, then it's part of the next
+				// item in the text, so put the character back.
+				if($this->char != ' ') $this->pos--;
+			}
+		}
+		else
+		{
+			$word = "unknown";
+			$parameter=null;
+			$special=false;
+		}
+		
+		$class = $this->lookupGroupClass($word);
+		
 		// Store state of document on stack.
-		$group = new RtfGroup();
-		if($this->group != null) $group->parent = $this->group;
+		/* @var $group RtfGroup */
+		$group = new $class();
+		$this->incrementStats($class);
+		if($group instanceof RtfGenericGroup)
+		{
+			$group->setWord($word);
+			$group->setParameter($parameter);
+			$group->setSpecial($special);
+		}
+		if($this->group != null)
+		{
+			$group->parent = $this->group;
+		}
 		if($this->root == null)
 		{
 			$this->group = $group;
@@ -80,16 +175,37 @@ class Rtfparser
 		}
 	}
 	
+	protected function lookupGroupClass($word)
+	{
+		switch(true)
+		{
+			case 'fonttbl'===$word:
+				return 'RtfFontTableGroup';
+			case 'colortbl'===$word:
+				return 'RtfColorTableGroup';
+			case 'stylesheet'===$word:
+				return 'RtfStylesheetGroup';
+			case 'info'===$word:
+				return 'RtfInfoGroup';
+			case 'pict'===$word:
+				return 'RtfPictureGroup';
+			default:
+				return 'RtfGenericGroup';
+		}
+	}
+	
 	protected function isLetter()
 	{
-		if(ord($this->char) >= 65 && ord($this->char) <= 90) return true;
-		if(ord($this->char) >= 90 && ord($this->char) <= 122) return true;
+		$ord = ord($this->char);
+		if($ord >= 65 && $ord <= 90) return true;
+		if($ord >= 97 && $ord <= 122) return true;
 		return false;
 	}
 	
 	protected function isDigit()
 	{
-		if(ord($this->char) >= 48 && ord($this->char) <= 57) return true;
+		$ord = ord($this->char);
+		if($ord >= 48 && $ord <= 57) return true;
 		return false;
 	}
 	
@@ -162,7 +278,7 @@ class Rtfparser
 			$this->getChar();
 			$parameter = $parameter . $this->char;
 			$rtfsymbol = new RtfHexaControlSymbol();
-			$rtfsymbol->setParameterFromHexa($parameter);
+			$rtfsymbol->setValueFromHex($parameter);
 			$this->group->children[] = $rtfsymbol;
 		}
 		else

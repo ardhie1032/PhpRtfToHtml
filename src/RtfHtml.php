@@ -54,10 +54,10 @@ class RtfHtml
 		
 		foreach($group->children as $child)
 		{
-			if(get_class($child) == "RtfGroup") $this->FormatGroup($child);
-			if(get_class($child) == "RtfControlWord") $this->FormatControlWord($child);
-			if(get_class($child) == "RtfControlSymbol") $this->FormatControlSymbol($child);
-			if(get_class($child) == "RtfText") $this->FormatText($child);
+			if($child instanceof RtfGroup) $this->FormatGroup($child);
+			if($child instanceof RtfControlWord) $this->FormatControlWord($child);
+			if($child instanceof RtfControlSymbol) $this->FormatControlSymbol($child);
+			if($child instanceof RtfText) $this->FormatText($child);
 		}
 		
 		// Pop state from stack.
