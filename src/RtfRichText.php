@@ -1,27 +1,36 @@
 <?php
 
 /**
- * RTF parser/formatter
+ * RtfRichText class file.
  *
- * This code reads RTF files and formats the RTF data to HTML.
+ * This class represents an utf-8 text. It is composed of basic 8-bits ascii
+ * rtf-compatible text, and an utf-8 version of all RtfControlSymbols.
  *
  * PHP version 5
  *
- * @author     Alexander van Oostenrijk
  * @author     Arnaud PETIT
- * @copyright  2014 Alexander van Oostenrijk
+ * @copyright  2014 Arnaud PETIT
  * @license    GNU GPLv2
  * @version    1
- * @link       http://www.websofia.com/2014/05/a-working-rtf-to-html-converter-in-php/
  * @link       https://github.com/Anastaszor/PhpRtfToHtml
  */
-class RtfText extends RtfElement
+class RtfRichText extends RtfElement
 {
+	
 	/**
-	 * 
+	 *
 	 * @var string
 	 */
-	public $text;
+	public $text = "";
+	
+	/**
+	 * Appends some text to the end of current text.
+	 * @param string $text
+	 */
+	public function addText($text)
+	{
+		$this->text .= $text;
+	}
 	
 	/**
 	 * (non-PHPdoc)
@@ -31,7 +40,7 @@ class RtfText extends RtfElement
 	{
 		echo "<div style='color:red'>";
 		echo $this->indentHtml($level);
-		echo "TEXT {$this->text}";
+		echo 'RICHTEXT '.htmlentities($this->text);
 		echo "</div>";
 	}
 	

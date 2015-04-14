@@ -121,7 +121,7 @@ abstract class RtfElement
 	 */
 	public function __destruct()
 	{
-		// do nothing
+		// does nothing
 	}
 	
 }
