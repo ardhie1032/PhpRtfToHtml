@@ -4,6 +4,9 @@
  * RtfRichTextConverter class file.
  *
  * This class represents a walker. This class takes into entry a group node,
+ * with RtfText object and RtfControlSymbols objects, and filter them all
+ * to have only RtfRichText objects instead of those. All elements will stay
+ * the same.
  *
  * PHP version 5
  *
