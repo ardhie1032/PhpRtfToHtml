@@ -6,22 +6,10 @@ $destination = __DIR__.DIRECTORY_SEPARATOR.'phprtftohtmllite.php';
 if(is_file($destination))
 	unlink($destination);
 
-class MyRecursiveFilterIterator extends RecursiveFilterIterator
-{
-	public static $FILTERS = array(
-		'__MACOSX',
-	);
-	public function accept() {
-		return !in_array($this->current()->getFilename(),self::$FILTERS,true)
-			&& preg_match('#\.php$#', $this->current()->getFilename());
-	}
-}
-
 $files = array();
 $iterator = new RecursiveDirectoryIterator($source);
 $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
-$f = new MyRecursiveFilterIterator($iterator);
-$all = new RecursiveIteratorIterator($f,RecursiveIteratorIterator::SELF_FIRST);
+$all = new RecursiveIteratorIterator($iterator);
 
 // get all php files from src folder
 foreach($all as $file)
@@ -54,6 +42,8 @@ foreach($all as $file)
 		'\.' => '.',	// string concatenation
 		',' => ',',		// next element
 		';' => ';',		// next statement
+		'\*' => '*',	// multiplication
+		'\+' => '+',	// addition
 	);
 	foreach($operators as $regex => $replacement)
 	{
