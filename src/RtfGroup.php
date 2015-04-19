@@ -70,4 +70,70 @@ abstract class RtfGroup extends RtfElement
 		return true;
 	}
 	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::__toString()
+	 */
+	public function __toString()
+	{
+		$str = '\\'.$this->getWord();
+		foreach($this->children as $child)
+		{
+			$str .= $child->__toString();
+		}
+		return $str;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::__toRtf()
+	 */
+	public function __toRtf()
+	{
+		$str = '{\\*\\'.$this->getWord();
+		foreach($this->children as $child)
+		{
+			$str .= $child->__toRtf();
+		}
+		return $str.'}';
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::__toHtml()
+	 */
+	public function __toHtml()
+	{
+		$str = htmlentities('\\'.$this->getWord());
+		foreach($this->children as $child)
+		{
+			$str .= $child->__toHtml();
+		}
+		return $str;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::free()
+	 */
+	public function free()
+	{
+		foreach($this->children as $child)
+		{
+			$child->free();
+		}
+		parent::free();
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::__destruct()
+	 */
+	public function __destruct()
+	{
+		$this->parent = null;
+		$this->children = array();
+		parent::__destruct();
+	}
+	
 }

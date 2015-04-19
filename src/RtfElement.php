@@ -29,6 +29,16 @@ abstract class RtfElement
 	}
 	
 	/**
+	 * Returns a 4-space for rtf indentation.
+	 * @param int $level
+	 * @return string
+	 */
+	protected function indentRtf($level)
+	{
+		return str_repeat(" ", 4*level);
+	}
+	
+	/**
 	 * Returns a tabulation for non html indentation.
 	 * @param unknown $level
 	 * @return string
@@ -46,6 +56,16 @@ abstract class RtfElement
 	public function dumpHtml($level=0)
 	{
 		return "<div>".$this->indentHtml($level).$this->dump($level)."</div>\n";
+	}
+	
+	/**
+	 * Dumps the content of this element into an rtf string human-readable.
+	 * @param int $level
+	 * @return string
+	 */
+	public function dumpRtf($level=0)
+	{
+		return $this->indentRtf($level).'\\'.$this->__toRtf()."\n";
 	}
 	
 	/**
