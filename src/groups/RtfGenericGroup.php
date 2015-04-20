@@ -143,4 +143,79 @@ class RtfGenericGroup extends RtfGroup
 		return (count($root->children)===0) ? null : $root;
 	}
 	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfGroup::__toString()
+	 */
+	public function __toString()
+	{
+		$str = "\\";
+		if($this->getSpecial())
+		{
+			$str .= "*\\";
+		}
+		$str .= $this->getWord();
+		if($this->getParameter() != '' && $this->getParameter() != 0)
+		{
+			$str .= $this->getParameter();
+		}
+		foreach($this->children as $child)
+		{
+			$str .= $child->__toString();
+		}
+		return $str;
+	}
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfGroup::__toRtf()
+	 */
+	public function __toRtf()
+	{
+		$str = '{\\*\\'.$this->getWord();
+		if($this->getParameter() != '' && $this->getParameter() != 0)
+		{
+			$str .= $this->getParameter();
+		}
+		foreach($this->children as $child)
+		{
+			$str .= $child->__toRtf();
+		}
+		return $str.'}';
+	}
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfGroup::__toHtml()
+	 */
+	public function __toHtml()
+	{
+		$str = '\\';
+		if($this->getSpecial())
+		{
+			$str .= '*\\';
+		}
+		$str .= $this->getWord();
+		if($this->getParameter() != '' && $this->getParameter() != 0)
+		{
+			$str .= $this->getParameter();
+		}
+		$str = htmlentities($str);
+		foreach($this->children as $child)
+		{
+			$str .= $child->__toHtml();
+		}
+		return $str;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfGroup::__destruct()
+	 */
+	public function __destruct()
+	{
+		$this->_word = null;
+		$this->_parameter = null;
+		$this->_special = null;
+		parent::__destruct();
+	}
+	
 }
