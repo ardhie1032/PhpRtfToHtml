@@ -154,8 +154,22 @@ class RtfHtml
 	/**
 	 * 
 	 * @param RtfFontTableGroup $fontTable
+	 * @return string
 	 */
 	protected function formatFontTable(RtfFontTableGroup $fontTable)
+	{
+		$str = '<style>';
+		// TODO add some css classes // TODO better parsing with more classes
+		$str .= '</style>';
+		return $str;
+	}
+	
+	/**
+	 * 
+	 * @param RtfColorTableGroup $colorTable
+	 * @return string
+	 */
+	protected function formatColorTable(RtfColorTableGroup $colorTable)
 	{
 		$str = '<style>';
 		// TODO add some css classes // TODO better parsing with more classes
