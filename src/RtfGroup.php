@@ -74,6 +74,62 @@ abstract class RtfGroup extends RtfElement
 	 * (non-PHPdoc)
 	 * @see RtfElement::__toString()
 	 */
+	public function dump($level = 0)
+	{
+		$str = '\\'.$this->getWord();
+		foreach($this->children as $child)
+		{
+			$str .= $child->dump($level + 1);
+		}
+		return $str;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::__toRtf()
+	 */
+	public function dumpRtf($level = 0)
+	{
+		$str = '{\\*\\'.$this->getWord();
+		foreach($this->children as $child)
+		{
+			$str .= $child->dumpRtf($level + 1);
+		}
+		return $str.'}';
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::__toHtml()
+	 */
+	public function dumpHtml($level = 0)
+	{
+		$str = "<div>";
+		$str .= $this->indentHtml($level);
+		$str .= "{ ".get_class($this).' : ';
+		$str .= $this->getWord();
+		$str .= "</div>\n";
+		
+		foreach($this->children as $child)
+		{
+// 			if($child instanceof RtfGenericGroup)
+// 			{
+// 				if ($child->IsDestination()) continue;
+// 			}
+			$str .= $child->dumpHtml($level + 2);
+		}
+		
+		$str .= "<div>";
+		$str .= $this->indentHtml($level);
+		$str .= "}";
+		$str .= "</div>\n";
+		return $str;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see RtfElement::__toString()
+	 */
 	public function __toString()
 	{
 		$str = '\\'.$this->getWord();
@@ -91,6 +147,10 @@ abstract class RtfGroup extends RtfElement
 	public function __toRtf()
 	{
 		$str = '{\\*\\'.$this->getWord();
+		if($this->getParameter() != '' && $this->getParameter() != 0)
+		{
+			$str .= $this->getParameter();
+		}
 		foreach($this->children as $child)
 		{
 			$str .= $child->__toRtf();
@@ -104,12 +164,7 @@ abstract class RtfGroup extends RtfElement
 	 */
 	public function __toHtml()
 	{
-		$str = htmlentities('\\'.$this->getWord());
-		foreach($this->children as $child)
-		{
-			$str .= $child->__toHtml();
-		}
-		return $str;
+		return $this->dumpHtml(0);
 	}
 	
 	/**

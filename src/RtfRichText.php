@@ -38,10 +38,11 @@ class RtfRichText extends RtfElement
 	 */
 	public function dumpHtml($level=0)
 	{
-		echo "<div style='color:red'>";
-		echo $this->indentHtml($level);
-		echo 'RICHTEXT '.htmlentities($this->text);
-		echo "</div>";
+		$str = "<div style='color:red'>";
+		$str .= $this->indentHtml($level);
+		$str .= 'RICHTEXT '.htmlentities($this->text);
+		$str .= "</div>";
+		return $str;
 	}
 	
 	/**

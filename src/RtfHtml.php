@@ -39,14 +39,20 @@ class RtfHtml
 	
 	protected function FormatGroup($group)
 	{
+		if($group instanceof RtfFontTableGroup) return $this->formatFontTable($group);
+		if($group instanceof RtfColorTableGroup) return $this->formatColorTable($group);
+		if($group instanceof RtfControlWord) return $this->FormatControlWord($group);
+		if($group instanceof RtfControlSymbol) return $this->FormatControlSymbol($group);
+		if($group instanceof RtfText) return $this->FormatText($group);
+		
 		// Can we ignore this group?
-		if ($group->GetType() == "fonttbl") return;
-		if ($group->GetType() == "colortbl") return;
-		if ($group->GetType() == "stylesheet") return;
-		if ($group->GetType() == "info") return;
+// 		if ($group->GetType() == "fonttbl") return;
+// 		if ($group->GetType() == "colortbl") return;
+// 		if ($group->GetType() == "stylesheet") return;
+// 		if ($group->GetType() == "info") return;
 		// Skip any pictures:
-		if (substr($group->GetType(), 0, 4) == "pict") return;
-		if ($group->IsDestination()) return;
+// 		if (substr($group->GetType(), 0, 4) == "pict") return;
+// 		if ($group->IsDestination()) return;
 		
 		// Push a new state onto the stack:
 		$this->state = clone $this->state;
@@ -54,10 +60,7 @@ class RtfHtml
 		
 		foreach($group->children as $child)
 		{
-			if($child instanceof RtfGroup) $this->FormatGroup($child);
-			if($child instanceof RtfControlWord) $this->FormatControlWord($child);
-			if($child instanceof RtfControlSymbol) $this->FormatControlSymbol($child);
-			if($child instanceof RtfText) $this->FormatText($child);
+			$this->FormatGroup($child);
 		}
 		
 		// Pop state from stack.
@@ -131,12 +134,12 @@ class RtfHtml
 		$this->output .= "</span>";
 	}
 	
-	protected function FormatControlSymbol($symbol)
+	protected function FormatControlSymbol(RtfControlSymbol $symbol)
 	{
-		if($symbol->symbol == '\'')
+		if($symbol->getSymbol() == '\'')
 		{
 			$this->BeginState();
-			$this->output .= htmlentities(chr($symbol->parameter), ENT_QUOTES, 'ISO-8859-1');
+			$this->output .= htmlentities(chr($symbol->getValue()), ENT_QUOTES, 'ISO-8859-1');
 			$this->EndState();
 		}
 	}
@@ -146,6 +149,18 @@ class RtfHtml
 		$this->BeginState();
 		$this->output .= $text->text;
 		$this->EndState();
+	}
+	
+	/**
+	 * 
+	 * @param RtfFontTableGroup $fontTable
+	 */
+	protected function formatFontTable(RtfFontTableGroup $fontTable)
+	{
+		$str = '<style>';
+		// TODO add some css classes // TODO better parsing with more classes
+		$str .= '</style>';
+		return $str;
 	}
 	
 }

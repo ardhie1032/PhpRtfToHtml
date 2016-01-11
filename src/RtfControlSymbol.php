@@ -75,10 +75,11 @@ class RtfControlSymbol extends RtfElement
 	 */
 	public function dumpHtml($level=0)
 	{
-		echo "<div style='color:blue'>";
-		echo $this->indentHtml($level);
-		echo "SYMBOL &quot;".$this->__toHtml().'&quot;';
-		echo "</div>\n";
+		$str = "<div style='color:blue'>";
+		$str .= $this->indentHtml($level);
+		$str .= "SYMBOL &quot;".$this->__toHtml().'&quot;';
+		$str .= "</div>\n";
+		return $str;
 	}
 	
 	/**

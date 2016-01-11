@@ -34,10 +34,11 @@ class RtfControlWord extends RtfElement
 	 */
 	public function dumpHtml($level = 0)
 	{
-		echo "<div style='color:green'>";
-		echo $this->indentHtml($level);
-		echo "WORD {$this->word} ({$this->parameter})";
-		echo "</div>";
+		$str = "<div style='color:green'>";
+		$str .= $this->indentHtml($level);
+		$str .= "WORD {$this->word} ({$this->parameter})";
+		$str .= "</div>";
+		return $str;
 	}
 	
 	/**

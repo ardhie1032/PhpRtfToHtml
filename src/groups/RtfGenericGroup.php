@@ -90,35 +90,6 @@ class RtfGenericGroup extends RtfGroup
 	
 	/**
 	 * (non-PHPdoc)
-	 * @see RtfElement::dumpHtml()
-	 */
-	public function dumpHtml($level = 0)
-	{
-		echo "<div>";
-		echo $this->indentHtml($level);
-		echo "{ ".get_class($this).' : ';
-		if($this->_special) echo '\\*';
-		echo $this->_word;
-		if($this->_parameter!==null) echo ' ('.$this->_parameter.')';
-		echo "</div>\n";
-	
-		foreach($this->children as $child)
-		{
-			if($child instanceof RtfGenericGroup)
-			{
-				if ($child->IsDestination()) continue;
-			}
-			$child->dumpHtml($level + 2);
-		}
-		
-		echo "<div>";
-		echo $this->indentHtml($level);
-		echo "}";
-		echo "</div>\n";
-	}
-	
-	/**
-	 * (non-PHPdoc)
 	 * @see RtfElement::extractTextTree()
 	 */
 	public function extractTextTree()
@@ -145,6 +116,38 @@ class RtfGenericGroup extends RtfGroup
 	
 	/**
 	 * (non-PHPdoc)
+	 * @see RtfGroup::dumpHtml()
+	 */
+	public function dumpHtml($level = 0)
+	{
+		$str = "<div>";
+		$str .= $this->indentHtml($level);
+		$str .= "{ ".get_class($this).' : ';
+		$str .= $this->getWord();
+		if($this->getParameter() !== '' && $this->getParameter() !== null)
+		{
+			$str .= $this->getParameter();
+		}
+		$str .= "</div>\n";
+		
+		foreach($this->children as $child)
+		{
+// 			if($child instanceof RtfGenericGroup)
+// 			{
+// 				if ($child->IsDestination()) continue;
+// 			}
+			$str .= $child->dumpHtml($level + 2);
+		}
+		
+		$str .= "<div>";
+		$str .= $this->indentHtml($level);
+		$str .= "}";
+		$str .= "</div>\n";
+		return $str;
+	}
+	
+	/**
+	 * (non-PHPdoc)
 	 * @see RtfGroup::__toString()
 	 */
 	public function __toString()
@@ -155,7 +158,7 @@ class RtfGenericGroup extends RtfGroup
 			$str .= "*\\";
 		}
 		$str .= $this->getWord();
-		if($this->getParameter() != '' && $this->getParameter() != 0)
+		if($this->getParameter() !== '' && $this->getParameter() !== null)
 		{
 			$str .= $this->getParameter();
 		}
@@ -172,7 +175,7 @@ class RtfGenericGroup extends RtfGroup
 	public function __toRtf()
 	{
 		$str = '{\\*\\'.$this->getWord();
-		if($this->getParameter() != '' && $this->getParameter() != 0)
+		if($this->getParameter() !== '' && $this->getParameter() !== null)
 		{
 			$str .= $this->getParameter();
 		}
@@ -188,22 +191,7 @@ class RtfGenericGroup extends RtfGroup
 	 */
 	public function __toHtml()
 	{
-		$str = '\\';
-		if($this->getSpecial())
-		{
-			$str .= '*\\';
-		}
-		$str .= $this->getWord();
-		if($this->getParameter() != '' && $this->getParameter() != 0)
-		{
-			$str .= $this->getParameter();
-		}
-		$str = htmlentities($str);
-		foreach($this->children as $child)
-		{
-			$str .= $child->__toHtml();
-		}
-		return $str;
+		return $this->dumpHtml(0);
 	}
 	
 	/**

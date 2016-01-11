@@ -6,5 +6,10 @@
         "classmap": [
             "src/"
         ]
-    }
+    },
+    "repositories": [
+        { 
+            "packagist": false
+        }
+    ]
 }

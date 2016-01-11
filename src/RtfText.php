@@ -29,10 +29,11 @@ class RtfText extends RtfElement
 	 */
 	public function dumpHtml($level=0)
 	{
-		echo "<div style='color:red'>";
-		echo $this->indentHtml($level);
-		echo "TEXT {$this->text}";
-		echo "</div>";
+		$str = "<div style='color:red'>";
+		$str .= $this->indentHtml($level);
+		$str .= "TEXT {$this->text}";
+		$str .= "</div>";
+		return $str;
 	}
 	
 	/**
