@@ -45,6 +45,7 @@ class RtfHtml
 		if($group instanceof RtfListTableGroup) return $this->formatListTable($group);
 		if($group instanceof RtfListOverrideTableGroup) return $this->formatListOverrideTable($group);
 		if($group instanceof RtfInfoGroup) return $this->formatInfo($group);
+		if($group instanceof RtfPnSecLevelGroup) return $this->formatPnSecLevel($group);
 		if($group instanceof RtfControlWord) return $this->FormatControlWord($group);
 		if($group instanceof RtfControlSymbol) return $this->FormatControlSymbol($group);
 		if($group instanceof RtfText) return $this->FormatText($group);
@@ -222,6 +223,18 @@ class RtfHtml
 	protected function formatInfo(RtfInfoGroup $info)
 	{
 		// TODO add meta tags // TODO better parsing with more classes
+	}
+	
+	/**
+	 * 
+	 * @param RtfPnSecLevelGroup $pnSecLevel
+	 */
+	protected function formatPnSecLevel(RtfPnSecLevelGroup $pnSecLevel)
+	{
+		$str = '<style>';
+		// TODO add some css classes // TODO better parsing with more classes
+		$str .= '</style>';
+		$this->output .= $str;
 	}
 	
 }
