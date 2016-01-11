@@ -44,6 +44,7 @@ class RtfHtml
 		if($group instanceof RtfStylesheetGroup) return $this->formatStylesheet($group);
 		if($group instanceof RtfListTableGroup) return $this->formatListTable($group);
 		if($group instanceof RtfListOverrideTableGroup) return $this->formatListOverrideTable($group);
+		if($group instanceof RtfInfoGroup) return $this->formatInfo($group);
 		if($group instanceof RtfControlWord) return $this->FormatControlWord($group);
 		if($group instanceof RtfControlSymbol) return $this->FormatControlSymbol($group);
 		if($group instanceof RtfText) return $this->FormatText($group);
@@ -212,6 +213,15 @@ class RtfHtml
 		// TODO add some css classes // TODO better parsing with more classes
 		$str .= '</style>';
 		$this->output .= $str;
+	}
+	
+	/**
+	 * 
+	 * @param RtfInfoGroup $info
+	 */
+	protected function formatInfo(RtfInfoGroup $info)
+	{
+		// TODO add meta tags // TODO better parsing with more classes
 	}
 	
 }
