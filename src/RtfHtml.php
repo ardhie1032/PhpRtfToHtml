@@ -41,6 +41,7 @@ class RtfHtml
 	{
 		if($group instanceof RtfFontTableGroup) return $this->formatFontTable($group);
 		if($group instanceof RtfColorTableGroup) return $this->formatColorTable($group);
+		if($group instanceof RtfStylesheetGroup) return $this->formatStylesheet($group);
 		if($group instanceof RtfControlWord) return $this->FormatControlWord($group);
 		if($group instanceof RtfControlSymbol) return $this->FormatControlSymbol($group);
 		if($group instanceof RtfText) return $this->FormatText($group);
@@ -170,6 +171,19 @@ class RtfHtml
 	 * @return string
 	 */
 	protected function formatColorTable(RtfColorTableGroup $colorTable)
+	{
+		$str = '<style>';
+		// TODO add some css classes // TODO better parsing with more classes
+		$str .= '</style>';
+		return $str;
+	}
+	
+	/**
+	 * 
+	 * @param RtfStylesheetGroup $stylesheet
+	 * @return string
+	 */
+	protected function formatStylesheet(RtfStylesheetGroup $stylesheet)
 	{
 		$str = '<style>';
 		// TODO add some css classes // TODO better parsing with more classes
