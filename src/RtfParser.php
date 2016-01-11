@@ -182,6 +182,7 @@ class Rtfparser
 			$word = "unknown";
 			$parameter=null;
 			$special=false;
+			$this->char = $this->rtf[$this->pos--];
 		}
 		
 		$class = $this->lookupGroupClass($word);
