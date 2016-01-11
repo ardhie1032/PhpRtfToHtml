@@ -83,6 +83,7 @@ class Rtfparser
 		'headerr' => 'RtfHeaderRightGroup',
 		'info' => 'RtfInfoGroup',
 		'latentstyles' => 'RtfLatentStylesGroup',
+		'listoverridetable' => 'RtfListOverrideTableGroup',
 		'listtable' => 'RtfListTableGroup',
 		'pict' => 'RtfPictureGroup',
 		'pnseclvl' => 'RtfPnSecLevelGroup',

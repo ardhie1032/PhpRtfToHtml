@@ -43,6 +43,7 @@ class RtfHtml
 		if($group instanceof RtfColorTableGroup) return $this->formatColorTable($group);
 		if($group instanceof RtfStylesheetGroup) return $this->formatStylesheet($group);
 		if($group instanceof RtfListTableGroup) return $this->formatListTable($group);
+		if($group instanceof RtfListOverrideTableGroup) return $this->formatListOverrideTable($group);
 		if($group instanceof RtfControlWord) return $this->FormatControlWord($group);
 		if($group instanceof RtfControlSymbol) return $this->FormatControlSymbol($group);
 		if($group instanceof RtfText) return $this->FormatText($group);
@@ -194,6 +195,18 @@ class RtfHtml
 	 * @param RtfListTableGroup $listTable
 	 */
 	protected function formatListTable(RtfListTableGroup $listTable)
+	{
+		$str = '<style>';
+		// TODO add some css classes // TODO better parsing with more classes
+		$str .= '</style>';
+		$this->output .= $str;
+	}
+	
+	/**
+	 * 
+	 * @param RtfListOverrideTableGroup $listOverrideTable
+	 */
+	protected function formatListOverrideTable(RtfListOverrideTableGroup $listOverrideTable)
 	{
 		$str = '<style>';
 		// TODO add some css classes // TODO better parsing with more classes
