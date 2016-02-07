@@ -27,6 +27,7 @@ class RtfControlSymbol extends RtfElement
 	 */
 	private static $_rtf_to_string = array(
 		'~' => ' ',		// non breaking space.
+		"\n" => "\n",		// line feed.
 		'|' => '',		// formula character in mac
 		'-' => '-',		// optional hyphen
 		'_' => '-',		// nonbreaking hyphen
@@ -40,6 +41,7 @@ class RtfControlSymbol extends RtfElement
 	 */
 	private static $_rtf_to_html = array(
 		'~' => '&nbsp;',// non breaking space.
+		"\n" => "<br />",		// line feed.
 		'|' => '|',		// formula character in mac
 		'-' => '-',		// optional hyphen
 		'_' => '-',		// nonbreaking hyphen

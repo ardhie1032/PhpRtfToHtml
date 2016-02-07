@@ -49,6 +49,28 @@ abstract class RtfGroup extends RtfElement
 		if(!($child instanceof RtfControlSymbol)) return null;
 		return $child->getSymbol() == '*';
 	}
+
+	public function getProperty($property)
+	{
+		foreach ($this->children as $child) {
+			if ($child instanceof RtfControlWord && $child->word === $property) {
+				return $child->parameter;
+			}
+		}
+
+		return null;
+	}
+
+	public function getText()
+	{
+		foreach ($this->children as $child) {
+			if ($child instanceof RtfText) {
+				return $child->text;
+			}
+		}
+
+		return null;
+	}
 	
 	/**
 	 * (non-PHPdoc)

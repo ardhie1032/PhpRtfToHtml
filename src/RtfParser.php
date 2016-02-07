@@ -87,6 +87,7 @@ class Rtfparser
 		'listtable' => 'RtfListTableGroup',
 		'pict' => 'RtfPictureGroup',
 		'pnseclvl' => 'RtfPnSecLevelGroup',
+		'rtf' => 'RtfRtfGroup',
 		'stylesheet' => 'RtfStylesheetGroup',
 		'themedata' => 'RtfThemeDataGroup',
 		'xmlnstbl' => 'RtfXmlNsTableGroup',
@@ -124,6 +125,9 @@ class Rtfparser
 	
 	protected function parseStartGroup()
 	{
+		// To roll back if we are in a generic group
+		$pos_save = $this->pos;
+
 		$this->getChar();
 		if($this->char=='\\')
 		{
@@ -193,10 +197,9 @@ class Rtfparser
 		$this->incrementStats($class);
 		if($group instanceof RtfGenericGroup)
 		{
-			$group->setWord($word);
-			$group->setParameter($parameter);
-			$group->setSpecial($special);
+			$this->pos = $pos_save;
 		}
+
 		if($this->group != null)
 		{
 			$group->parent = $this->group;
@@ -295,15 +298,16 @@ class Rtfparser
 			$this->getChar();
 			$parameter = $this->char;
 			$this->getChar();
-			$parameter = $parameter . $this->char;
+			$parameter .= $this->char;
 			$rtfsymbol = new RtfHexaControlSymbol();
+			$rtfsymbol->setSymbol($symbol);
 			$rtfsymbol->setValueFromHex($parameter);
 			$this->group->children[] = $rtfsymbol;
 		}
 		else
 		{
 			$rtfsymbol = new RtfControlSymbol();
-			$rtfsymbol->symbol = $symbol;
+			$rtfsymbol->setSymbol($symbol);
 			$this->group->children[] = $rtfsymbol;
 		}
 	}
@@ -371,12 +375,12 @@ class Rtfparser
 	
 	public function parse($rtf)
 	{
-		// Ignore \r and \n
-		$this->rtf = str_replace(array("\n", "\r"), '', $rtf);
+		$this->rtf = $rtf;
 		$this->pos = 0;
 		$this->len = strlen($this->rtf);
 		$this->group = null;
 		$this->root = null;
+		$this->properties = array();
 		
 		while($this->pos < $this->len)
 		{
