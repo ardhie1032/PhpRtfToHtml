@@ -19,9 +19,14 @@ class RtfHtml
 {
 	
 	private $output = "";
-	
+
+	/** @var RtfRtfGroup */
+	private $root;
+
+	/** @var RtfState */
 	private $state = null;
-	
+
+	/** @var RtfState[] */
 	private $states = array();
 	
 	public function Format($root)
@@ -32,6 +37,8 @@ class RtfHtml
 		// Put an initial standard state onto the stack:
 		$this->state = new RtfState();
 		$this->states[] = $this->state;
+
+		$this->root = $root;
 		
 		$this->FormatGroup($root);
 		return $this->output;
@@ -49,7 +56,8 @@ class RtfHtml
 		if($group instanceof RtfControlWord) return $this->FormatControlWord($group);
 		if($group instanceof RtfControlSymbol) return $this->FormatControlSymbol($group);
 		if($group instanceof RtfText) return $this->FormatText($group);
-		
+		if($group instanceof RtfPictureGroup) return "";
+
 		// Can we ignore this group?
 // 		if ($group->GetType() == "fonttbl") return;
 // 		if ($group->GetType() == "colortbl") return;
@@ -91,6 +99,16 @@ class RtfHtml
 			$this->state->hidden = $word->parameter;
 		if($word->word == "fs") 
 			$this->state->fontsize = ceil(($word->parameter / 24) * 16);
+		if($word->word == "f")
+			$this->state->fontstyle = $word->parameter;
+		if($word->word == "super")
+			$this->state->super = $word->parameter;
+		if($word->word == "sub")
+			$this->state->sub = $word->parameter;
+		if($word->word == "cb")
+			$this->state->bgColor = $word->parameter;
+		if($word->word == "cf")
+			$this->state->color = $word->parameter;
 		
 		if($word->word == "par") 
 			$this->output .= "<p>";
@@ -112,26 +130,41 @@ class RtfHtml
 			$this->output .= "&bull;";
 		if($word->word == "u")
 			$this->output .= "&loz;";
+		if($word->word == "tab")
+			$this->output .= "&#9;";
 	}
 	
 	protected function BeginState()
 	{
-		$span = "";
-		if($this->state->bold) 
-			$span .= "font-weight:bold;";
+		$style = "";
+		$class = "";
+		if($this->state->bold)
+			$style .= "font-weight:bold;";
 		if($this->state->italic) 
-			$span .= "font-style:italic;";
+			$style .= "font-style:italic;";
 		if($this->state->underline) 
-			$span .= "text-decoration:underline;";
+			$style .= "text-decoration:underline;";
 		if($this->state->end_underline) 
-			$span .= "text-decoration:none;";
+			$style .= "text-decoration:none;";
 		if($this->state->strike) 
-			$span .= "text-decoration:strikethrough;";
+			$style .= "text-decoration:strikethrough;";
 		if($this->state->hidden) 
-			$span .= "display:none;";
+			$style .= "display:none;";
+		if($this->state->super)
+			$style .= "vertical-align: super; font-size: 0.7em;";
+		if($this->state->sub)
+			$style .= "vertical-align: sub; font-size: 0.7em;";
 		if($this->state->fontsize != 0) 
-			$span .= "font-size: {$this->state->fontsize}px;";
-		$this->output .= "<span style='{$span}'>";
+			$style .= "font-size: {$this->state->fontsize}px;";
+
+		if($this->state->fontstyle)
+			$class .= "font-{$this->state->fontstyle} ";
+		if($this->state->color)
+			$class .= "color-{$this->state->color} ";
+		if($this->state->bgColor)
+			$class .= "bg-color-{$this->state->color} ";
+
+		$this->output .= "<span style='{$style}' class='{$class}'>";
 	}
 	
 	protected function EndState()
@@ -144,7 +177,26 @@ class RtfHtml
 		if($symbol->getSymbol() == '\'')
 		{
 			$this->BeginState();
-			$this->output .= htmlentities(chr($symbol->getValue()), ENT_QUOTES, 'ISO-8859-1');
+
+			switch ($this->root->getCharset()) {
+				default:
+				case "ansi":
+				case "pc":
+				case "pca":
+					$encoding = 'windows-1252';
+					break;
+
+				case "mac":
+					$encoding = 'macroman';
+					break;
+
+			}
+			$this->output .= htmlentities(chr($symbol->getValue()), ENT_QUOTES, $encoding);
+			$this->EndState();
+		}
+		else {
+			$this->BeginState();
+			$this->output .= $symbol->__toHtml();
 			$this->EndState();
 		}
 	}
@@ -163,8 +215,38 @@ class RtfHtml
 	protected function formatFontTable(RtfFontTableGroup $fontTable)
 	{
 		$str = '<style>';
+		$fontId = null;
+
 		// TODO add some css classes // TODO better parsing with more classes
-		$str .= '</style>';
+		foreach ($fontTable->children as $font) {
+			if ($font instanceof RtfGroup) {
+				$style = null;
+				$fontId = null;
+				foreach ($font->children as $_child) {
+					if ($_child instanceof RtfText) {
+						$style = "font-family: $_child->text;";
+					}
+
+					if ($_child instanceof RtfControlWord && $_child->word == "f") {
+						$fontId = $_child->parameter;
+					}
+				}
+
+				if ($fontId) {
+					$str .= ".font-$fontId{ $style }";
+				}
+				continue;
+			}
+
+			if ($font instanceof RtfControlWord && $font->word == "f") {
+				$fontId = $font->parameter;
+			}
+
+			if ($font instanceof RtfText) {
+				$str .= ".font-$fontId{ font-family: $font->text; }";
+			}
+		}
+ 		$str .= '</style>';
 		$this->output .= $str;
 	}
 	
@@ -175,7 +257,36 @@ class RtfHtml
 	protected function formatColorTable(RtfColorTableGroup $colorTable)
 	{
 		$str = '<style>';
-		// TODO add some css classes // TODO better parsing with more classes
+		$i = 1;
+
+		$rgb = array(
+			'red'   => 0,
+			'green' => 0,
+			'blue'  => 0,
+		);
+
+		$atLeastOne = false;
+
+		foreach ($colorTable->children as $child) {
+			if ($child instanceof RtfControlWord ) {
+				$rgb[$child->word] = $child->parameter;
+				$atLeastOne = true;
+			}
+
+			if ($atLeastOne && $child instanceof RtfText) {
+				$color = "rgb({$rgb['red']},{$rgb['green']},{$rgb['blue']});";
+				$str .= ".color-$i{color:$color}";
+				$str .= ".bg-color-$i{background-color:$color}";
+
+				$rgb = array(
+					'red'   => 0,
+					'green' => 0,
+					'blue'  => 0,
+				);
+
+				$i++;
+			}
+		}
 		$str .= '</style>';
 		$this->output .= $str;
 	}
