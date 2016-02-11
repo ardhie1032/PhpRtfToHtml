@@ -43,30 +43,59 @@ class RtfHtml
 		$this->FormatGroup($root);
 		return $this->output;
 	}
-	
+
+	/**
+	 * @param RtfGroup $group
+	 *
+	 * @return string|void
+	 */
 	protected function FormatGroup($group)
 	{
-		if($group instanceof RtfFontTableGroup) return $this->formatFontTable($group);
-		if($group instanceof RtfColorTableGroup) return $this->formatColorTable($group);
-		if($group instanceof RtfStylesheetGroup) return $this->formatStylesheet($group);
-		if($group instanceof RtfListTableGroup) return $this->formatListTable($group);
-		if($group instanceof RtfListOverrideTableGroup) return $this->formatListOverrideTable($group);
-		if($group instanceof RtfInfoGroup) return $this->formatInfo($group);
-		if($group instanceof RtfPnSecLevelGroup) return $this->formatPnSecLevel($group);
-		if($group instanceof RtfControlWord) return $this->FormatControlWord($group);
-		if($group instanceof RtfControlSymbol) return $this->FormatControlSymbol($group);
-		if($group instanceof RtfText) return $this->FormatText($group);
-		if($group instanceof RtfPictureGroup) return "";
+		if($group instanceof RtfControlWord)
+			return $this->FormatControlWord($group);
+
+		if($group instanceof RtfControlSymbol)
+			return $this->FormatControlSymbol($group);
+
+		if($group instanceof RtfText)
+			return $this->FormatText($group);
+
+		if($group instanceof RtfFontTableGroup)
+			return $this->formatFontTable($group);
+
+		if($group instanceof RtfColorTableGroup)
+			return $this->formatColorTable($group);
+
+		if($group instanceof RtfStylesheetGroup)
+			return $this->formatStylesheet($group);
+
+		if($group instanceof RtfListTableGroup)
+			return $this->formatListTable($group);
+
+		if($group instanceof RtfListOverrideTableGroup)
+			return $this->formatListOverrideTable($group);
+
+		if($group instanceof RtfInfoGroup)
+			return $this->formatInfo($group);
+
+		if($group instanceof RtfPnSecLevelGroup)
+			return $this->formatPnSecLevel($group);
+
+		if ($group->IsDestination())
+			return;
+
+		if(  $group instanceof RtfPictureGroup
+			|| $group instanceof RtfThemeDataGroup
+			|| $group instanceof RtfColorSchemeMappingGroup
+			|| $group instanceof RtfLatentStylesGroup
+			|| $group instanceof RtfDataStoreGroup
+		)
+			return;
 
 		// Can we ignore this group?
-// 		if ($group->GetType() == "fonttbl") return;
-// 		if ($group->GetType() == "colortbl") return;
-// 		if ($group->GetType() == "stylesheet") return;
-// 		if ($group->GetType() == "info") return;
-		// Skip any pictures:
-// 		if (substr($group->GetType(), 0, 4) == "pict") return;
-// 		if ($group->IsDestination()) return;
-		
+		if (strpos($group->GetType(), "shp")   === 0) return;
+		if (strpos($group->GetType(), "xmlns") === 0) return;
+
 		// Push a new state onto the stack:
 		$this->state = clone $this->state;
 		$this->states[] = $this->state;
@@ -83,54 +112,63 @@ class RtfHtml
 	
 	protected function FormatControlWord($word)
 	{
-		if($word->word == "plain") 
+		if($word->word === "plain") 
 			$this->state->Reset();
-		if($word->word == "b") 
+		if($word->word === "b") 
 			$this->state->bold = $word->parameter;
-		if($word->word == "i") 
+		if($word->word === "i") 
 			$this->state->italic = $word->parameter;
-		if($word->word == "ul") 
+		if($word->word === "ul") 
 			$this->state->underline = $word->parameter;
-		if($word->word == "ulnone") 
+		if($word->word === "ulnone") 
 			$this->state->end_underline = $word->parameter;
-		if($word->word == "strike") 
+		if($word->word === "strike") 
 			$this->state->strike = $word->parameter;
-		if($word->word == "v") 
+		if($word->word === "v") 
 			$this->state->hidden = $word->parameter;
-		if($word->word == "fs") 
+		if($word->word === "fs") 
 			$this->state->fontsize = ceil(($word->parameter / 24) * 16);
-		if($word->word == "f")
+		if($word->word === "f")
 			$this->state->fontstyle = $word->parameter;
-		if($word->word == "super")
+		if($word->word === "super")
 			$this->state->super = $word->parameter;
-		if($word->word == "sub")
+		if($word->word === "sub")
 			$this->state->sub = $word->parameter;
-		if($word->word == "cb")
+		if($word->word === "cb")
 			$this->state->bgColor = $word->parameter;
-		if($word->word == "cf")
+		if($word->word === "cf")
 			$this->state->color = $word->parameter;
+
+		if($word->word === "ql")
+			$this->state->align = "left";
+		if($word->word === "qc")
+			$this->state->align = "center";
+		if($word->word === "qr")
+			$this->state->align = "right";
+		if($word->word === "qj")
+			$this->state->align = "justify";
 		
-		if($word->word == "par") 
-			$this->output .= "<p>";
-		
+		if($word->word === "par") 
+			$this->output .= "<p style='text-align: {$this->state->align};'>";
+
 		// Characters:
-		if($word->word == "lquote") 
+		if($word->word === "lquote") 
 			$this->output .= "&lsquo;";
-		if($word->word == "rquote") 
+		if($word->word === "rquote") 
 			$this->output .= "&rsquo;";
-		if($word->word == "ldblquote") 
+		if($word->word === "ldblquote") 
 			$this->output .= "&ldquo;";
-		if($word->word == "rdblquote") 
+		if($word->word === "rdblquote") 
 			$this->output .= "&rdquo;";
-		if($word->word == "emdash") 
+		if($word->word === "emdash") 
 			$this->output .= "&mdash;";
-		if($word->word == "endash") 
+		if($word->word === "endash") 
 			$this->output .= "&ndash;";
-		if($word->word == "bullet") 
+		if($word->word === "bullet") 
 			$this->output .= "&bull;";
-		if($word->word == "u")
+		if($word->word === "u")
 			$this->output .= "&loz;";
-		if($word->word == "tab")
+		if($word->word === "tab")
 			$this->output .= "&#9;";
 	}
 	
@@ -174,7 +212,7 @@ class RtfHtml
 	
 	protected function FormatControlSymbol(RtfControlSymbol $symbol)
 	{
-		if($symbol->getSymbol() == '\'')
+		if($symbol->getSymbol() === '\'')
 		{
 			$this->BeginState();
 
@@ -227,7 +265,7 @@ class RtfHtml
 						$style = "font-family: $_child->text;";
 					}
 
-					if ($_child instanceof RtfControlWord && $_child->word == "f") {
+					if ($_child instanceof RtfControlWord && $_child->word === "f") {
 						$fontId = $_child->parameter;
 					}
 				}
@@ -238,7 +276,7 @@ class RtfHtml
 				continue;
 			}
 
-			if ($font instanceof RtfControlWord && $font->word == "f") {
+			if ($font instanceof RtfControlWord && $font->word === "f") {
 				$fontId = $font->parameter;
 			}
 
@@ -259,11 +297,13 @@ class RtfHtml
 		$str = '<style>';
 		$i = 1;
 
-		$rgb = array(
+		$rgb_empty = array(
 			'red'   => 0,
 			'green' => 0,
 			'blue'  => 0,
 		);
+
+		$rgb = $rgb_empty;
 
 		$atLeastOne = false;
 
@@ -278,11 +318,7 @@ class RtfHtml
 				$str .= ".color-$i{color:$color}";
 				$str .= ".bg-color-$i{background-color:$color}";
 
-				$rgb = array(
-					'red'   => 0,
-					'green' => 0,
-					'blue'  => 0,
-				);
+				$rgb = $rgb_empty;
 
 				$i++;
 			}
