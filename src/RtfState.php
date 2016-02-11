@@ -26,6 +26,7 @@ class RtfState
     public $super = false;
     public $sub = false;
     public $fontsize = 0;
+    public $align = "left";
 
     public $fontstyle = false;
     public $color = false;
@@ -41,6 +42,7 @@ class RtfState
         $this->hidden = false;
         $this->super = false;
         $this->fontsize = 0;
+        $this->align = "left";
 
         $this->fontstyle = false;
         $this->color = false;

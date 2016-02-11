@@ -129,11 +129,11 @@ class Rtfparser
 		$pos_save = $this->pos;
 
 		$this->getChar();
-		if($this->char=='\\')
+		if($this->char === '\\')
 		{
 			$special = false;
 			$this->getChar();
-			if($this->char==='*')
+			if($this->char === '*')
 			{
 				// if this is a star, then the group should begin 2 characters
 				// later. A star indicates a non-recognizable special group.
@@ -152,7 +152,7 @@ class Rtfparser
 			// Paramater may be negative.
 			$parameter = null;
 			$negative = false;
-			if($this->char == '-')
+			if($this->char === '-')
 			{
 				$this->getChar();
 				$negative = true;
@@ -167,7 +167,7 @@ class Rtfparser
 			if($negative) $parameter = -$parameter;
 			
 			
-			if($word == "u")
+			if($word === "u")
 			{
 				// If this is \u, then the parameter will be followed by
 				// a character.
@@ -178,7 +178,7 @@ class Rtfparser
 				// it is a delimiter. It is consumed.
 				// If it's not a space, then it's part of the next
 				// item in the text, so put the character back.
-				if($this->char != ' ') $this->pos--;
+				if($this->char !== ' ') $this->pos--;
 			}
 		}
 		else
@@ -197,6 +197,7 @@ class Rtfparser
 		$this->incrementStats($class);
 		if($group instanceof RtfGenericGroup)
 		{
+			$group->setSpecial($special);
 			$this->pos = $pos_save;
 		}
 
@@ -218,17 +219,12 @@ class Rtfparser
 	
 	protected function isLetter()
 	{
-		$ord = ord($this->char);
-		if($ord >= 65 && $ord <= 90) return true;
-		if($ord >= 97 && $ord <= 122) return true;
-		return false;
+		return strpos("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", $this->char) !== false;
 	}
 	
 	protected function isDigit()
 	{
-		$ord = ord($this->char);
-		if($ord >= 48 && $ord <= 57) return true;
-		return false;
+		return strpos("0123456789", $this->char) !== false;
 	}
 	
 	protected function parseEndGroup()
@@ -248,10 +244,10 @@ class Rtfparser
 		}
 		
 		// Read parameter (if any) consisting of digits.
-		// Paramater may be negative.
+		// Parameter may be negative.
 		$parameter = null;
 		$negative = false;
-		if($this->char == '-')
+		if($this->char === '-')
 		{
 			$this->getChar();
 			$negative = true;
@@ -267,7 +263,7 @@ class Rtfparser
 		
 		// If this is \u, then the parameter will be followed by
 		// a character.
-		if($word == "u")
+		if($word === "u")
 		{
 		}
 		// If the current character is a space, then
@@ -276,7 +272,7 @@ class Rtfparser
 		// item in the text, so put the character back.
 		else
 		{
-			if($this->char != ' ') $this->pos--;
+			if($this->char !== ' ') $this->pos--;
 		}
 		
 		$rtfword = new RtfControlWord();
@@ -291,7 +287,7 @@ class Rtfparser
 		$this->getChar();
 		$symbol = $this->char;
 		
-		if($symbol == '\'')
+		if($symbol === '\'')
 		{
 			// Symbols ordinarily have no parameter. However,
 			// if this is \', then it is followed by a 2-digit hex-code:
@@ -337,24 +333,23 @@ class Rtfparser
 			$escape = false;
 			
 			// Is this an escape?
-			if($this->char == '\\')
+			if($this->char === '\\')
 			{
 				// Perform lookahead to see if this
 				// is really an escape sequence.
 				$this->getChar();
-				switch($this->char)
+				$char = $this->char;
+				if ($char === '\\' || $char === '{' || $char === '}')
 				{
-					case '\\': $text .= '\\'; break;
-					case '{': $text .= '{'; break;
-					case '}': $text .= '}'; break;
-					default:
-						// Not an escape. Roll back.
-						$this->pos = $this->pos - 2;
-						$terminate = true;
-						break;
+					$text .= $char;
+				}
+				else {
+					// Not an escape. Roll back.
+					$this->pos -= 2;
+					$terminate = true;
 				}
 			}
-			else if($this->char == '{' || $this->char == '}')
+			else if($this->char === '{' || $this->char === '}')
 			{
 				$this->pos--;
 				$terminate = true;

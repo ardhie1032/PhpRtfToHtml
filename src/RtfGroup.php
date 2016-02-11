@@ -43,11 +43,20 @@ abstract class RtfGroup extends RtfElement
 	public function IsDestination()
 	{
 		// No children?
-		if(sizeof($this->children) == 0) return null;
+		if (sizeof($this->children) == 0)
+		{
+			return null;
+		}
+
 		// First child not a control symbol?
 		$child = $this->children[0];
-		if(!($child instanceof RtfControlSymbol)) return null;
-		return $child->getSymbol() == '*';
+
+		if (!($child instanceof RtfControlSymbol))
+		{
+			return null;
+		}
+
+		return $child->getSymbol() === '*';
 	}
 
 	public function getProperty($property)
@@ -134,10 +143,6 @@ abstract class RtfGroup extends RtfElement
 		
 		foreach($this->children as $child)
 		{
-// 			if($child instanceof RtfGenericGroup)
-// 			{
-// 				if ($child->IsDestination()) continue;
-// 			}
 			$str .= $child->dumpHtml($level + 2);
 		}
 		
